@@ -39,13 +39,7 @@ env:
                                               # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: iot_platform_app           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
-  AWS_S3_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
-  AWS_S3_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
-  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-  CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-  CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-  DB_URI: ${{ secrets.DB_URI }}
-  CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+
 
 permissions: write-all
 
@@ -92,7 +86,6 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-        REGION: ${{ env.AWS_REGION }}
       run: |
         # Build a docker container and
         # push it to ECR so that it can
