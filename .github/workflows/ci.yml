@@ -28,7 +28,7 @@ name: CI-Workflows
 on:
   push:
     branches-ignore:
-
+  workflow_call:
 jobs:
   setup:
     runs-on: ubuntu-latest
