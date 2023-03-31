@@ -5,6 +5,7 @@ const timezoned = () => {
         timeZone: 'Asia/Ho_Chi_Minh'
     });
 }
+require('dotenv').config()
 let date_ob = new Date();
 // adjust 0 before single digit date
 let date = ("0" + date_ob.getDate()).slice(-2);
