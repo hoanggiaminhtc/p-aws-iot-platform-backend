@@ -24,7 +24,7 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: CI-CD-Workflows
+name: CD-Workflows
 
 on:
   push:
@@ -36,12 +36,11 @@ env:
   ECS_SERVICE: iot-platform-backend                 # set this to your Amazon ECS service name
   ECS_CLUSTER: iot-platform-backend                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: task-definition/task-definition.json # set this to the path to your Amazon ECS task definition
-                                               # file, e.g. .aws/task-definition.json
+                                              # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: iot_platform_app           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   # **************************************************
@@ -49,16 +48,7 @@ jobs:
   # **************************************************
   run-ci:
     # Run on github Ubuntu Linux VM
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 'latest'
-      - run: npm ci
-      - run: npm run build --if-present
+    uses: .github/workflows/ci.yml
 
 
   # **************************************************
@@ -67,7 +57,6 @@ jobs:
   run-cd:
     # Depend on CI job
     needs: run-ci
-
     name: Deploy
     runs-on: ubuntu-latest
     environment: develop
