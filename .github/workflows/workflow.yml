@@ -70,7 +70,7 @@ jobs:
       CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
       DB_URI: ${{ secrets.DB_URI }}
       CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-      REGION: ${{ env.AWS_REGION }}
+      REGION: ap-southeast-1
     environment: develop
 
     steps:
