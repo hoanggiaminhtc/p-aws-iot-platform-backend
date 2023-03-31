@@ -1,6 +1,5 @@
 const winston = require('winston')
 const S3StreamLogger = require('s3-streamlogger').S3StreamLogger;
-require('dotenv').config();
 const timezoned = () => {
     return new Date().toLocaleString('en-US', {
         timeZone: 'Asia/Ho_Chi_Minh'
