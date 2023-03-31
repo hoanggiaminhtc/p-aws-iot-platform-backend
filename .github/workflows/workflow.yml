@@ -62,16 +62,17 @@ jobs:
       contains('refs/heads/develop', github.ref)
     name: Deploy
     runs-on: ubuntu-latest
-    env:
-      AWS_S3_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
-      AWS_S3_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
-      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-      DB_URI: ${{ secrets.DB_URI }}
-      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-      REGION: ap-southeast-1
     environment: develop
+    run: |
+      touch .env
+      echo AWS_S3_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY_ID }} >> .env
+      echo AWS_S3_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }} >> .env
+      echo BUCKET_NAME: ${{ secrets.BUCKET_NAME }} >> .env
+      echo CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }} >> .env
+      echo CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }} >> .env
+      echo DB_URI: ${{ secrets.DB_URI }} >> .env
+      echo CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }} >> .env
+      echo REGION: ap-southeast-1 >> .env
 
     steps:
     - name: Checkout
