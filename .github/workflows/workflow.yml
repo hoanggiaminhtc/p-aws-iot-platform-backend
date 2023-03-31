@@ -71,6 +71,7 @@ jobs:
       DB_URI: ${{ secrets.DB_URI }}
       CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
       REGION: ap-southeast-1
+    environment: develop
 
     steps:
     - name: Checkout
