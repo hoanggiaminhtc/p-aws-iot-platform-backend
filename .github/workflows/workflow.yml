@@ -65,6 +65,8 @@ jobs:
   run-cd:
     # Depend on CI job
     needs: run-ci
+    if:
+      contains('refs/heads/develop', github.ref)
     name: Deploy
     runs-on: ubuntu-latest
     environment: develop
