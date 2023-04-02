@@ -1,58 +1,223 @@
 const mqtt = require("mqtt");
-const Topic = require("../models/Topic");
 const logger = require("../AppLog/logger");
-var options = {
-  host: "645074f05ae34d8480922ca276b085d8.s1.eu.hivemq.cloud",
-  port: 8883,
-  protocol: "mqtts",
-  username: "thaibui",
-  password: "1234567890",
-};
 const Telemetry = require("../models/Telemetry");
-//initialize the MQTT client
+const Widget = require("../models/Widget");
+const Gateway = require("../models/Gateway");
+const Device = require("../models/Device");
+require('dotenv').config()
+var options = {
+  host: process.env.MQTT_HOST,
+  port: process.env.MQTT_PORT,
+  protocol: process.env.MQTT_PROTOCOL,
+  username: process.env.MQTT_USERNAME,
+  password: process.env.MQTT_PASSWORD
+};
 const client = mqtt.connect(options);
-// const client = mqtt.connect("mqtt://localhost:1883");
-//set up the callbacks
 client.on("connect", function () {
-  logger.info(`MQTT connected`)
+  logger.info(`MQTT connected`);
 });
 client.on("error", function (error) {
-  logger.error(`MQTT connect failed: ${error}`)
+  logger.error(`MQTT connect failed: ${error}`);
 });
-Topic.find({})
-  .then((data) => {
-    data.forEach((data) => {
-      client.subscribe(data._id.toString());
+Device.find({})
+  .then((device) => {
+    device.forEach((device) => {
+      client.subscribe(device._id.toString());
     });
   })
-  .catch((err) => {});
+.catch((err) => {});
+Gateway.find({})
+  .then((gateway) => {
+    gateway.forEach((gateway) => {
+      client.subscribe("responseGW/"+gateway._id.toString());
+    });
+  })
+.catch((err) => {});
+
+function isJson(String) {
+  try {
+      JSON.parse(String);
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+// client.subscribe("64270f066c7b20e64d57215f")
+//set up the message callbacks
 client.on("message", async function (topic, message) {
-  logger.info(`Received Topic: ${topic} - Recevied mesage: ${message.toString()}`)
-  const data = await Telemetry.create({ topic: topic, value: message });
+  let tranfer = message.toString();
+  if (isJson(tranfer)) {
+    let obj = JSON.parse(tranfer);
+    // If add device success
+    if (obj.message == "Add success") {
+      await Device.findOneAndUpdate({_id:obj.id},{gatewayack:true})
+      console.log(obj.id,obj.message,"add device success")
+    }
+    else if (obj.message == "gwConnected") {
+      await Gateway.findOneAndUpdate({_id:obj.id},{connectstatus:"Connected"})
+    }
+    // If gateway disconnect
+    else if (obj.message == "GATEWAY DISCONNECTION"){
+      await Gateway.findOneAndUpdate({_id:obj.id},{connectstatus: "Disconnected"})
+    }
+    else if (obj.message == "send data"){
+      await Telemetry.create({ deviceId: topic, value: obj.value });
+    }
+    else if (obj.message == "dvDisconnect"){
+      await Device.findOneAndUpdate({ deviceId: obj.id}, { connectstatus: "Disconnected" });
+    }
+    else if (obj.message == "dvConnect"){
+      await Device.findOneAndUpdate({ deviceId: obj.id}, { connectstatus: "Connected" });
+    }
+  }
 });
 
-exports.getListTopics = async (req, res, next) => {
+exports.gpioHigh = async (req, res, next) => {
   try {
-    const listTopic = await Topic.find({ idUser: req.body.userId });
-    res.status(200).json({ status: "success", topics: listTopic });
-    logger.info(`Get List Topics successfully", "userId": "${req.body.userId}`);
+    const widget = await Widget.findById(req.params.widgetId);
+    client.publish("controlGW/"+widget.gatewayId, 
+      JSON.stringify({"message":"GPIO","status":"high","device":widget.device_id}));
+    console.log("high");
+    console.log("controlGW/"+widget.gatewayId)
+    res.status(200).json({
+      status: "success",
+      data: { gatewayId: widget.gatewayId, Turn_message: "high", topic: widget.device_id }
+    });
   } catch (error) {
-    logger.error(`Get List Topics fail", \"userId\": \"${req.body.userId}\", \"ERROR\": \"${error}`);
     next(error);
   }
 };
-
-exports.addTopic = async (req, res, next) => {
+exports.gpioLow = async (req, res, next) => {
   try {
-    const topic = await Topic.create({ ...req.body });
-    client.subscribe(topic._id.toString());
+    const widget = await Widget.findById(req.params.widgetId);
+    client.publish("controlGW/"+widget.gatewayId, 
+      JSON.stringify({"message":"GPIO","status":"low","device":widget.device_id}));
+    console.log("Low");
+    console.log(widget.device_id);
+    console.log("controlGW/"+widget.gatewayId)
     res.status(200).json({
       status: "success",
-      data: topic._id,
+      data: { gatewayId: widget.gatewayId, Turn_message: "low" , topic: widget.device_id}
     });
-    logger.info(`Add Topics successfully", "userId": "${req.body.userId}", "TopicId" : "${topic._id}`);
   } catch (error) {
-    logger.error(`Get List Topics fail", \"userId\": \"${req.body.userId}\", \"ERROR\": \"${error}`);
+    next(error);
+  }
+};
+exports.verifyGateway = async (req, res, next) => {
+  try {
+    const gateway = await Gateway.findOne({serialnumber: req.body.serialnumber});
+    if(gateway){
+      client.subscribe("responseGW/"+gateway._id.toString());
+      await Gateway.findByIdAndUpdate(gateway._id,{gatewayip: req.body.gatewayip});
+      console.log("veri5 gateway")
+      return res.status(200).json({
+        status: "connect success",
+        topic: "controlGW/"+gateway._id
+      });
+    }
+    else{
+      res.status(200).json({
+      status: "connect fail"
+      })
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+async function delay(ms) {
+  // return await for better async stack trace support in case of errors.
+  return await new Promise(resolve => setTimeout(resolve, ms));
+}
+exports.addDevice = async (req, res, next) => {
+  try {
+    const gatewayId = req.params.gatewayId;
+    const gateway = await Gateway.findById(gatewayId);
+    let device = await Device.create({ ...req.body, gatewayid: gatewayId });
+    if (gateway.connectstatus == "Connected") {
+      const tp = device._id.toString()
+      while (device.gatewayack === false){
+        client.publish("controlGW/"+gatewayId, JSON.stringify({ "message":"Add new device", "topic":tp }))
+        await delay(3000)
+        device = await Device.findById(device._id.toString())
+      }
+      client.subscribe(tp);
+      res.status(200).json({
+        status: "send device info to gateway success",
+        data: { device },
+      });
+    }
+    else{
+      client.unsubscribe(device._id.toString())
+      await Device.findByIdAndDelete(device._id);
+      res.status(400).json({
+        status: "send request message to gateway fail, please check your serial number and restart gateway"
+      });
+    }
+    logger.info(`Add device successfully", \"userId\": \"${req.body.userId}`);
+  } catch (error) {
+    logger.error(`Add device device fail", \"userId\": \" ${req.body.userId}\",\"ERROR\": \"${error}`);
+    next(error);
+  }
+};
+exports.verifyDevice = async (req, res, next) => {
+  try {
+    const device = await Device.findOne({serialnumber: req.params.serialnumber});
+    console.log(device.gatewayid)
+    const gateway = await Gateway.findById(device.gatewayid);
+    if(device){
+      console.log("verifyDV")
+      console.log("controlDV/"+device._id.toString())
+      client.subscribe(device._id.toString())  
+      res.status(200).json({
+        status: "success",
+        controlTopic: "controlDV/"+device._id.toString(),
+        gatewayip: gateway.gatewayip,
+        datastream: device._id.toString()
+      });
+    }
+    else{
+      return res.status(200).json({
+        status: "fail"
+      });
+    }
+    //logger.info(`Delete gateway successfully", \"userId\": \"${req.body.userId}","gatewayId": "${gatewayId}`);
+  } catch (error) {
+    //logger.error(`Delete gateway fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
+    next(error);
+  }
+};
+exports.unsubscribeAlldevice = async (req, res, next) => {
+  try {
+      const gatewayId = req.params.gatewayId;
+      Device.find({gatewayId})
+      .then((device) => {
+        device.forEach((device) => {
+          client.unsubscribe(device._id.toString());
+          });
+      })
+      .catch((error) => {
+        logger.error(`Unsubscribe fail", "userId": "${req.body.userId}", "ERROR": "${error}`);
+        next(error);
+      });
+      logger.info(`Unsubscribe successfully", "userId": "${req.body.userId}", "deviceId": "${gatewayId}`)
+      next();
+  } catch (error) {
+      logger.error(`Unsubscribe fail", "userId": "${req.body.userId}", "ERROR": "${error}`);
+      next(error);
+  }
+};
+exports.addGateway = async (req, res, next) => {
+  try {
+    const userId = req.body.userId;
+    const gateway = await Gateway.create({ ...req.body, userid: userId });
+    client.subscribe("responseGW/"+gateway._id.toString())
+    res.status(200).json({
+      status: "success",
+      data: { gateway },
+    });
+    logger.info(`Add gateway successfully", \"userId\": \"${req.body.userId}`);
+  } catch (error) {
+    logger.error(`Add gateway device fail", \"userId\": \" ${req.body.userId}\",\"ERROR\": \"${error}`);
     next(error);
   }
 };

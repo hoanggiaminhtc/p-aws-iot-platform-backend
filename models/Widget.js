@@ -1,13 +1,21 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const widgetSchema = new mongoose.Schema({  
-    name: {type: String, unique: true , required: [true, 'Name must be require']}, //Người dùng đặt khi tạo
-    type: {type: String, required: [true, 'Type must be require']}, //Kiểu biểu đồ mặc định
-    device: {type: String, required: [true, 'Device must be require']},// Chọn thiết bị
-    topic: {type: String, required: [true, 'Topic must be require']},
-    dashboard_id: {type: String, required: [true, 'Dashboard must be require']}
-}, {timestamps: true})
+const widgetSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: [true, "Name must be require"] },
+    type: { type: String, required: [true, "Type must be require"] },
+    device_id: { type: String },
+    dashboard_id: {
+      type: String,
+      required: [true, "Dashboard must be require"],
+    },
+    gatewayId: { type: String, required: [true, "Gateway must be require"] },
+    userId: { type: String, required: [true, "User must be require"] },
+    unit: { type: String }
+  },
+  { timestamps: true }
+);
 
-const Widget = mongoose.model('Widget', widgetSchema);
+const Widget = mongoose.model("Widget", widgetSchema);
 
 module.exports = Widget;
