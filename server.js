@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 route(app);
-app.use('*', (err, req, res) => {
+app.use('*', (err, req, res,next) => {
     const message = err.message || "Server is not respond";
     const status = err.status || 500;
     res.status(status).json({message});
