@@ -1,55 +1,27 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const nm = require("nodemailer");
 const logger = require("../AppLog/logger")
-
-const transporter = nm.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.APP_EMAIL,
-    pass: process.env.APP_PASSWORD,
-  },
-});
+require('dotenv').config()
+const sgMail = require('@sendgrid/mail');
+//sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 function sendEmail(value, mail) {
   const options = {
     from: process.env.APP_EMAIL,
     to: mail,
     subject: "Your new password",
-    text: "Your new password is: " + value,
+    text: "Your new password is: " + value
   };
-  transporter.sendMail(options, function (error, info) {
-    if (error) {
-      logger.error(`Send email fail: ${error}`);
-    } else {
-      logger.info("Send mail successfully");
-    }
-  });
+  sgMail
+  .send(options)
+  .then(() => {
+    console.log('Email sent')
+  })
+  .catch((error) => {
+    console.error(error)
+  })
 }
-exports.register = async (req, res, next) => {
-  try {
-    const tokenTime = { expiresIn: "3h" };
-    const user = await User.create({ ...req.body, avatarurl: "" });
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.APP_SECRET,
-      tokenTime
-    );
-    res.status(200).json({
-      status: "success",
-      data: { token, userName: user.name, avatarUrl: user.avatarurl },
-    });
-    logger.info(`registered successfully",\"userId\": \"${user._id}`)
-  } catch (error) {
-    logger.error(`register fail: ${error}`);
-    const err = { message: "Email exits", status: 400 };
-    next(err);
-  }
-};
 exports.login = async (req, res, next) => {
-  console.log("Data : ", req.body);
   try {
     const tokenTime = { expiresIn: "24h" };
     const user = await User.findOne({ email: req.body.email });
@@ -57,6 +29,7 @@ exports.login = async (req, res, next) => {
       const err = { message: "Email or password is not correct", status: 400 };
       next(err);
     }
+    
     if (bcrypt.compareSync(req.body.password, user.password)) {
       // (mật khẩu nhập, mật khẩu đã hash)
       const token = jwt.sign(
@@ -71,7 +44,8 @@ exports.login = async (req, res, next) => {
           userName: user.name,
           id: user._id,
           avatarUrl: user.avatarurl,
-        }, //,avatar: user.avatar , cloudinary_id: user.cloudinary_id}
+          role: user.role
+        } //,avatar: user.avatar , cloudinary_id: user.cloudinary_id}
       });
       logger.info(`Log-in successfully", \"userId\": \"${user._id}`);
     } else {
@@ -83,7 +57,7 @@ exports.login = async (req, res, next) => {
     next(error);
   }
 };
-exports.forgetPassword = async (req, res, next) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     const userEmail = await User.findOne({ email: req.body.email });
     if (!userEmail) {
@@ -99,7 +73,7 @@ exports.forgetPassword = async (req, res, next) => {
       );
       sendEmail(randomPassword, userEmail.email);
       res.status(200).json({
-        status: "success",
+        status: "success"
       });
       logger.info(`Send random password succesfully", \"userId\": \"${userEmail._id}`);
     }
@@ -123,7 +97,7 @@ exports.changePassword = async (req, res, next) => {
         { new: true, runValidator: true }
       );
       res.status(200).json({
-        status: "success",
+        status: "success"
       });
       logger.info(`Change password successfully", \"userId\": \"${userId}`)
     } else {
@@ -139,10 +113,19 @@ exports.changePassword = async (req, res, next) => {
 exports.authentication = async (req, res, next) => {
   const userId = req.body.userId;
   try {
-    const user = await User.findById(userId).select("name avatarurl");
-    res.status(200).json(user);
+    const user = await User.findById(userId).select("name avatarurl role");
+    res.status(200).json({
+      status: "success",
+      data: user
+    });
   } catch (err) {
     logger.error(`Authentication's Failed",\"userId\": \"${userId}\",\"ERROR\": \"${err}`)
     next(err);
   }
 };
+
+
+
+
+
+

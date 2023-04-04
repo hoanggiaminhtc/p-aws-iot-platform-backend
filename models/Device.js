@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
-const deviceSchema = new mongoose.Schema({     //unique: độc nhất, trim: bỏ space
-    name: {type: String, required: [true, 'Name must be require']},
-    type: {type: String, required: [true, 'Type of device must be require']},
+const deviceSchema = new mongoose.Schema({
+    name: {type: String, required: [true, 'name must be require']},
+    type: {type: String, default:""},
     description: {type: String, default:""},
-    userid: {type: String, required: [true, 'user Id must be require']}
+    gatewayid: {type: String},
+    serialnumber: {type: String, unique: true, required: [true, 'serial number must be require']},
+    gatewayack: {type: Boolean, default:false},
+    connectstatus: {type: String, default: "Not Connected"}
 }, {timestamps: true})
 
 const Device = mongoose.model('Device', deviceSchema);

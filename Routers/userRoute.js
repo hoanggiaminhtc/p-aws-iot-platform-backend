@@ -1,5 +1,5 @@
 const express = require('express');
-const upload = require("../cloudinary/multer")
+const upload = require("../cloudinary/multer");
 const { getProfile, updateProfile} = require('../Controllers/userController');
 const { verifyToken } = require('../Middlewares/verifyToken');
 const Router = express.Router();

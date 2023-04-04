@@ -1,8 +1,5 @@
 const Telemetry = require('../models/Telemetry');
-const mqtt = require('mqtt');
-const Topic = require('../models/Topic');
 const logger = require("../AppLog/logger");
-const client = mqtt.connect('');
 exports.getAllData = async (req, res, next) => {
     await Telemetry.find({})
         .then((telemetry) => {
@@ -33,8 +30,8 @@ exports.getDeviceData = async (req, res, next) => {
 };
 exports.getDatalastnday = async (req, res, next) => {
   await Telemetry.find({
-    topic: req.query.topic,
-    createdAt: { $gte: new Date(new Date().getTime() - req.query.date) },
+    deviceId: req.query.deviceId,
+    createdAt: { $gte: new Date(new Date().getTime() - Number(req.query.date)) },
   })
     .sort({ createdAt: -1 })
     .then((telemetry) => {
@@ -51,36 +48,18 @@ exports.getDatalastnday = async (req, res, next) => {
     });
 };
 
-exports.deleteTopicAndUnsubscribe = async (req, res, next) => {
-    try {
-        const {deviceId} = req.params;
-        const top = await Topic.find({deviceId:deviceId});
-        for (let i = 0; i < top.length; i++) {
-            client.unsubscribe(top[i]._id.toString());
-            await Telemetry.deleteMany({topic:top[i].topic});
-        }
-        await Topic.deleteMany({deviceId:deviceId});
-        logger.info(`delete Topic And Unsubscribe successfully", "userId": "${req.body.userId}", "deviceId": "${deviceId}`)
-        next();
-    } catch (error) {
-        logger.error(`delete Topic And Unsubscribe fail", "userId": "${req.body.userId}", "ERROR": "${error}`);
-        next(error);
-    }
-};
-
-exports.getTopicData = async (req, res, next) => {
+exports.getlastDeviceData = async (req, res, next) => {
   try {
-    const telemetry = await Telemetry.find({ topic: req.params.topicId })
+    const telemetry = await Telemetry.find({ deviceId: req.params.deviceId })
       .limit(5)
       .sort({ _id: -1 });
-
     res.status(200).json({
       status: "success",
       data: telemetry.length === 0 ? 0 : { telemetry },
     });
-    logger.info(`Get Topic Data successfully", "userId": "${req.body.userId}", "topicId": "${req.params.topicId}`);
+    logger.info(`Get Device Data successfully", "userId": "${req.body.userId}", "deviceId": "${req.params.deviceId}`);
   } catch (error) {
-    logger.error(`Get Topic Data fail", "userId": "${req.body.userId}", "ERROR": "${error}`);
+    logger.error(`Get Device Data fail", "userId": "${req.body.userId}", "ERROR": "${error}`);
     next(error);
   }
 };

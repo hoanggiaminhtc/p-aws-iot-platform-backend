@@ -1,12 +1,11 @@
 const cloudinary = require("../cloudinary/cloudinary");
 const User = require("../models/User");
 const logger = require("../AppLog/logger");
-//getProfile
 exports.getProfile = async (req, res, next) => {
   try {
     const userId = req.body["userId"];
     const user = await User.findOne({ _id: userId }).select(
-      "name email avatar's url"
+      "name email avatarurl"
     ); //cloudinary_id')
     res.status(200).json({
       status: "success",
@@ -19,7 +18,6 @@ exports.getProfile = async (req, res, next) => {
   }
 };
 
-//updateProfile
 exports.updateProfile = async (req, res, next) => {
   try {
     const userId = req.body.userId;
@@ -28,7 +26,7 @@ exports.updateProfile = async (req, res, next) => {
       userId,
       { name: req.body.name, avatarurl: result.secure_url },
       { new: true, runValidator: true }
-    ); // res noi dung update
+    );
     res.status(200).json({
       status: "success",
       data: { name: user.name, avatar: user.avatarurl, email: user.email },

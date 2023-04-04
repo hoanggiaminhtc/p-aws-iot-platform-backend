@@ -103,6 +103,12 @@ jobs:
         echo 'REGION= "ap-southeast-1"' >> .env
         echo 'APP_PORT = 5000' >> .env
         echo 'APP_SECRET = thai123' >> .env
+        echo 'APP_EMAIL = ${{ secrets.APP_EMAIL }}' >> .env
+        echo 'MQTT_HOST = "${{ secrets.MQTT_HOST }}"' >> .env
+        echo 'MQTT_PORT = ${{ secrets.MQTT_PORT }}' >> .env
+        echo 'MQTT_PROTOCOL = "mqtts"' >> .env
+        echo 'MQTT_USERNAME = "${{ secrets.MQTT_USERNAME }}"' >> .env
+        echo 'MQTT_PASSWORD = "${{ secrets.MQTT_PASSWORD }}"' >> .env
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"

@@ -7,7 +7,7 @@ exports.getAlldboard = async (req, res, next) => {
     .then((dashboard) => {
       res.status(200).json({
         status: "success",
-        data: { dashboard },
+        data: { dashboard }
       });
       logger.info(`Get all dashboard successfully", \"userId\": \"${userId}`);
     })
@@ -21,7 +21,7 @@ exports.getDashboard = async (req, res, next) => {
     .then((dashboard) => {
       res.status(200).json({
         status: "success",
-        data: { dashboard },
+        data: { dashboard }
       });
       logger.info(`Get dashboard successfully", \"userId\": \"${req.body.userId}`);
     })
@@ -40,7 +40,7 @@ exports.addDashboard = async (req, res, next) => {
     logger.info(`Add dashboard successfully", \"userId\": \"${req.body.userId}`);
     return res.status(200).json({
       status: "success",
-      data: dashboard,
+      data: dashboard
     });
   } catch (error) {
     logger.error(`Add dashboard fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
@@ -54,7 +54,7 @@ exports.deleteDashboard = async (req, res, next) => {
     await Dashboard.findByIdAndDelete(dashboardId);
     res.status(200).json({
       status: "success",
-      message: "Delete successfully",
+      message: "Delete successfully"
     });
     logger.info(`Delete dashboard successfully", \"userId\": \"${req.body.userId}", "dashboardID" : "${req.params.dashboardId}`);
   } catch (error) {
@@ -67,11 +67,11 @@ exports.updateDashboard = async (req, res, next) => {
     const dashboardId = req.params.dashboardId;
     const dashboard = await Dashboard.findByIdAndUpdate(dashboardId, req.body, {
       new: true,
-      runValidator: true,
-    }); // res noi dung update
+      runValidator: true
+    });
     res.status(200).json({
       status: "success",
-      data: dashboard,
+      data: dashboard
     });
     logger.info(`Update dashboard successfully", \"userId\": \"${req.body.userId}", "dashboardID" : "${req.params.dashboardId}`);
   } catch (error) {
@@ -85,7 +85,7 @@ exports.getListWidgets = async (req, res, next) => {
     const widgets = await Widget.find({});
     res.status(200).json({
       status: "success",
-      data: { widgets },
+      data: { widgets }
     });
     logger.info(`List Widgets successfully", \"userId\": \"${req.body.userId}`);
   } catch (error) {
@@ -96,10 +96,10 @@ exports.getListWidgets = async (req, res, next) => {
 
 exports.addWidget = async (req, res, next) => {
   try {
-    const widget = await Widget.create({ ...req.body });
+    const widget = await Widget.create({ ...req.body});
     res.status(200).json({
       status: "success",
-      data: widget,
+      data: widget
     });
     logger.info(`Add Widget successfully", \"userId\": \"${req.body.userId}`);
   } catch (error) {
@@ -113,11 +113,24 @@ exports.deleteWidget = async (req, res, next) => {
     await Widget.findByIdAndDelete(widgetId);
     res.status(200).json({
       status: "success",
-      message: "Delete successfully",
+      message: "Delete successfully"
     });
     logger.info(`Delete Widget successfully", \"userId\": \"${req.body.userId}`);
   } catch (error) {
     logger.error(`Delete Widget fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
+    next(error);
+  }
+};
+exports.getOneWidget = async (req, res, next) => {
+  try {
+    const widget = await Widget.findById(req.params.widgetId);
+    res.status(200).json({
+      status: "success",
+      data: widget
+    });
+    logger.info("Get One Widget successfully");
+  } catch (error) {
+    logger.error(`Add Widget fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
     next(error);
   }
 };
@@ -126,11 +139,11 @@ exports.updateWidget = async (req, res, next) => {
     const widgetId = req.params.widgetId;
     const widget = await Widget.findByIdAndUpdate(widgetId, req.body, {
       new: true,
-      runValidator: true,
-    }); // res noi dung update
+      runValidator: true
+    });
     res.status(200).json({
       status: "success",
-      data: widget,
+      data: widget
     });
   } catch (error) {
     next(error);
@@ -138,10 +151,10 @@ exports.updateWidget = async (req, res, next) => {
 };
 exports.getListWidgets = async (req, res, next) => {
   try {
-    const widgets = await Widget.find({});
+    const widgets = await Widget.find({ userId: req.body.userId });
     res.status(200).json({
       status: "success",
-      data: { widgets },
+      data: { widgets }
     });
     logger.info(`List Widget successfully", \"userId\": \"${req.body.userId}`);
   }catch (error) {

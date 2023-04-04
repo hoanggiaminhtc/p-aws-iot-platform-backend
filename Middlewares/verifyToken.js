@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-const logger = require("../AppLog/logger");
-
+const logger = require("../AppLog/logger")
 exports.verifyToken = async (req, res, next) => {
   // Lay quyen truy cap tu req header
   const Authorization = req.header("authorization");
@@ -15,7 +14,6 @@ exports.verifyToken = async (req, res, next) => {
     // Verify token
     const { userId } = jwt.verify(token, "thai123");
     req.body.userId = userId;
-    req.params.userIdS3 = userId;
     next();
   } catch (error) {
     logger.error(`Authorization fail", "ERROR": "${error.message}`);
