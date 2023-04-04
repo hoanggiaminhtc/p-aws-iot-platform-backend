@@ -18,7 +18,7 @@ app.use('*', (err, req, res,next) => {
     const status = err.status || 500;
     res.status(status).json({message});
 })
-app.get('/heathcheck',(req, res) =>{
+app.get('/api/v1/healthcheck',(req, res) =>{
     res.writeHead(200, {
         'Content-Type': 'text/plain',
         'Content-Length': 2
