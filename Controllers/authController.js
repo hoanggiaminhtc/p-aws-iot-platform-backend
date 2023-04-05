@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const logger = require("../AppLog/logger")
 require('dotenv').config()
 const sgMail = require('@sendgrid/mail');
-//sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 function sendEmail(value, mail) {
   const options = {
     from: process.env.APP_EMAIL,
