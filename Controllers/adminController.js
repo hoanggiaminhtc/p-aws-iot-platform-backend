@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
 exports.getAllUser = async (req, res, next) => {
   try {
     const user = await User.find({ role: { $ne: 1 } }).select(
-      "name email role avatarurl createdAt"
+        "name email role avatarurl createdAt"
     );
     res.status(200).json({
       status: "success",
@@ -32,11 +32,11 @@ exports.getAllUser = async (req, res, next) => {
   }
 };
 exports.deleteUser = async (req, res, next) => {
-  const userId = req.params.deletebyUserId;
+  const userId = req.params.userId;
   try {
     const gatewayid = await Gateway.find({userid: userId});
     const deviceId = await Device.find({userid: userId});
-    
+
     for (let i = 0; i < deviceId.length; i++) {
       await Telemetry.deleteMany({deviceId: deviceId[i]._id.toString()});
     }
@@ -56,7 +56,7 @@ exports.deleteUser = async (req, res, next) => {
   }
 };
 exports.getUserGateway = async (req, res, next) => {
-  const userId = req.params.gwuserId;
+  const userId = req.params.userId;
   try {
     const gateway = await Gateway.find({userid:userId})
     res.status(200).json({
@@ -69,5 +69,4 @@ exports.getUserGateway = async (req, res, next) => {
     next(err);
   }
 };
-
 
