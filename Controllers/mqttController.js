@@ -46,7 +46,7 @@ client.on("message", async function (topic, message) {
   // logger.info(
   //   `Received Topic: ${topic} - Recevied mesage: ${message.toString()}`
   // );
-  console.log("Received Topic: " + topic + "Recevied mesage: " + message.toString());
+  console.log("Received Topic: " + topic + "  Recevied mesage: " + message.toString());
   let tranfer = message.toString();
   if (isJson(tranfer)) {
     let obj = JSON.parse(tranfer);
@@ -66,10 +66,10 @@ client.on("message", async function (topic, message) {
       await Telemetry.create({ deviceId: topic, value: obj.value });
     }
     else if (obj.message == "dvDisconnect"){
-      await Device.findOneAndUpdate({ deviceId: obj.id}, { connectstatus: "Disconnected" });
+      await Device.findOneAndUpdate({ _id: topic}, { connectstatus: "Disconnected" });
     }
     else if (obj.message == "dvConnect"){
-      await Device.findOneAndUpdate({ deviceId: obj.id}, { connectstatus: "Connected" });
+      await Device.findOneAndUpdate({ _id: topic}, { connectstatus: "Connected" });
     }
   }
 });
