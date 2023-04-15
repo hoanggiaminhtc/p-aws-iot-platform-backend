@@ -64,7 +64,7 @@ client.on("message", async function (topic, message) {
       await Gateway.findOneAndUpdate({_id:obj.id},{connectstatus: "Disconnected"})
     }
     else if (obj.message == "send data"){
-      await TelemetryData.create({ deviceId: topic, value: obj.value });
+      await Telemetry.create({ deviceId: topic, value: obj.value });
     }
     else if (obj.message == "dvDisconnect"){
       await Device.findOneAndUpdate({ deviceId: obj.id}, { connectstatus: "Disconnected" });
