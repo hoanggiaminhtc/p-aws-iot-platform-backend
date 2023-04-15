@@ -21,7 +21,7 @@ client.on("error", function (error) {
 Device.find({})
     .then((device) => {
       device.forEach((device) => {
-        client.subscribe(device._id.toString(), {qos:1});
+        client.subscribe(device._id.toString())//, {qos:1});
       });
     })
     .catch((err) => {});
@@ -41,7 +41,6 @@ function isJson(String) {
   }
   return true;
 }
-client.subscribe("64270f066c7b20e64d57215f")
 //set up the message callbacks
 client.on("message", async function (topic, message) {
   // logger.info(
@@ -139,18 +138,18 @@ exports.addDevice = async (req, res, next) => {
     if (gateway.connectstatus == "Connected") {
       const tp = device._id.toString()
       while (device.gatewayack === false){
-        client.publish("controlGW/"+gatewayId, JSON.stringify({ "message":"Add new device", "topic":tp }), {qos:1})
+        client.publish("controlGW/"+gatewayId, JSON.stringify({ "message":"Add new device", "topic":tp }))//, {qos:1})
         await delay(3000)
         device = await Device.findById(device._id.toString())
       }
-      client.subscribe(tp, {qos:1});
+      client.subscribe(tp)//, {qos:1});
       res.status(200).json({
         status: "send device info to gateway success",
         data: { device },
       });
     }
     else{
-      client.unsubscribe(device._id.toString(), {qos:1})
+      client.unsubscribe(device._id.toString())//, {qos:1})
       await Device.findByIdAndDelete(device._id);
       res.status(400).json({
         status: "send request message to gateway fail, please check your verify code and restart gateway"
@@ -170,7 +169,7 @@ exports.verifyDevice = async (req, res, next) => {
     if(device){
       console.log("verifyDV")
       console.log("controlDV/"+device._id.toString())
-      client.subscribe(device._id.toString(), {qos:1})
+      client.subscribe(device._id.toString())//, {qos:1})
       res.status(200).json({
         status: "success",
         controlTopic: "controlDV/"+device._id.toString(),
@@ -183,9 +182,9 @@ exports.verifyDevice = async (req, res, next) => {
         status: "fail"
       });
     }
-    logger.info(`Delete gateway successfully", \"userId\": \"${req.body.userId}","gatewayId": "${gatewayId}`);
+    //logger.info(`Delete gateway successfully", \"userId\": \"${req.body.userId}","gatewayId": "${gatewayId}`);
   } catch (error) {
-    logger.error(`Delete gateway fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
+    //logger.error(`Delete gateway fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
     next(error);
   }
 };
@@ -195,7 +194,7 @@ exports.unsubscribeAlldevice = async (req, res, next) => {
     Device.find({gatewayId})
         .then((device) => {
           device.forEach((device) => {
-            client.unsubscribe(device._id.toString(), {qos:1});
+            client.unsubscribe(device._id.toString())//, {qos:1});
           });
         })
         .catch((err) => {});
@@ -210,7 +209,7 @@ exports.addGateway = async (req, res, next) => {
   try {
     const userId = req.body.userId;
     const gateway = await Gateway.create({ ...req.body, userid: userId });
-    client.subscribe("responseGW/"+gateway._id.toString(), {qos:1})
+    client.subscribe("responseGW/"+gateway._id.toString())//, {qos:1})
     res.status(200).json({
       status: "success",
       data: { gateway },
