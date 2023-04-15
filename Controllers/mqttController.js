@@ -164,7 +164,7 @@ exports.addDevice = async (req, res, next) => {
 };
 exports.verifyDevice = async (req, res, next) => {
   try {
-    const device = await Device.findOne({verifycode: req.params.serialnumber});
+    const device = await Device.findOne({serialnumber: req.params.serialnumber});
     console.log(device.gatewayid)
     const gateway = await Gateway.findById(device.gatewayid);
     if(device){
