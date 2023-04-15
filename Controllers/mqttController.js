@@ -108,7 +108,7 @@ exports.gpioLow = async (req, res, next) => {
 };
 exports.verifyGateway = async (req, res, next) => {
   try {
-    const gateway = await Gateway.findOne({Serialnumber: req.body.serialnumber});
+    const gateway = await Gateway.findOne({serialnumber: req.body.serialnumber});
     if(gateway){
       client.subscribe("responseGW/"+gateway._id.toString(), {qos:1});
       await Gateway.findByIdAndUpdate(gateway._id,{gatewayip: req.body.gatewayip});
