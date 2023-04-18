@@ -65,7 +65,9 @@ exports.updateWidget = async (req, res, next) => {
             status: "success",
             data: widget
         });
+        logger.info("UpDate Widget successfully");
     } catch (error) {
+        logger.error(`UpDate Widget fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
         next(error);
     }
 };

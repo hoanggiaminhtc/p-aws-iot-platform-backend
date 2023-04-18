@@ -28,5 +28,5 @@ app.get('/api/v1/healthcheck',(req, res) =>{
 })
 
 app.listen(port, () => {
-    logger.info(`server running at http://localhost:${port}/`);
+    logger.info(`server is running`);
 });

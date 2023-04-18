@@ -27,7 +27,9 @@ exports.getAllUser = async (req, res, next) => {
       status: "success",
       data: user
     });
+    logger.info(`getAllUser successfully`)
   } catch (err) {
+    logger.error(`getAllUser fail: ${err}`)
     next(err);
   }
 };

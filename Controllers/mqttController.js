@@ -182,9 +182,9 @@ exports.verifyDevice = async (req, res, next) => {
         status: "fail"
       });
     }
-    //logger.info(`Delete gateway successfully", \"userId\": \"${req.body.userId}","gatewayId": "${gatewayId}`);
+    logger.info(`Delete gateway successfully", \"userId\": \"${req.body.userId}","gatewayId": "${device.gatewayid}`);
   } catch (error) {
-    //logger.error(`Delete gateway fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
+    logger.error(`Delete gateway fail", \"userId\": \"${req.body.userId}\",\"ERROR\": \"${error}`);
     next(error);
   }
 };
