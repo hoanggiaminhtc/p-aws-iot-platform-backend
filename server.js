@@ -30,3 +30,4 @@ app.get('/api/v1/healthcheck',(req, res) =>{
 app.listen(port, () => {
     logger.info(`server is running`);
 });
+// demo CICD
