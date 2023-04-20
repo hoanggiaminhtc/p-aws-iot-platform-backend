@@ -13,13 +13,13 @@ function sendEmail(value, mail) {
     text: "Your new password is: " + value
   };
   sgMail
-  .send(options)
-  .then(() => {
-    console.log('Email sent')
-  })
-  .catch((error) => {
-    console.error(error)
-  })
+      .send(options)
+      .then(() => {
+        console.log('Email sent')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 }
 exports.login = async (req, res, next) => {
   try {
@@ -29,13 +29,13 @@ exports.login = async (req, res, next) => {
       const err = { message: "Email or password is not correct", status: 400 };
       next(err);
     }
-    
+
     if (bcrypt.compareSync(req.body.password, user.password)) {
       // (mật khẩu nhập, mật khẩu đã hash)
       const token = jwt.sign(
-        { userId: user._id },
-        process.env.APP_SECRET,
-        tokenTime
+          { userId: user._id },
+          process.env.APP_SECRET,
+          tokenTime
       );
       res.status(200).json({
         status: "success",
@@ -67,9 +67,9 @@ exports.forgotPassword = async (req, res, next) => {
       let randomPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       const passWord = await User.findByIdAndUpdate(
-        userEmail._id,
-        { password: hashedPassword },
-        { new: true, runValidator: true }
+          userEmail._id,
+          { password: hashedPassword },
+          { new: true, runValidator: true }
       );
       sendEmail(randomPassword, userEmail.email);
       res.status(200).json({
@@ -92,9 +92,9 @@ exports.changePassword = async (req, res, next) => {
     if (bcrypt.compareSync(oldPass, user.password)) {
       const hashedPassword = await bcrypt.hash(newPass, 10);
       const passWord = await User.findByIdAndUpdate(
-        userId,
-        { password: hashedPassword },
-        { new: true, runValidator: true }
+          userId,
+          { password: hashedPassword },
+          { new: true, runValidator: true }
       );
       res.status(200).json({
         status: "success"
@@ -123,7 +123,6 @@ exports.authentication = async (req, res, next) => {
     next(err);
   }
 };
-
 
 
 
